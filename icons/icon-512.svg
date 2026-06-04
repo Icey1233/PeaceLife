@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="PeaceLife">
+  <rect width="512" height="512" rx="96" fill="#f6f3ea"/>
+  <rect x="64" y="64" width="384" height="384" rx="64" fill="#dfeee8" stroke="#256f69" stroke-width="16"/>
+  <path d="M149 296c54 48 160 48 214 0" fill="none" stroke="#bf7b2d" stroke-width="26" stroke-linecap="round"/>
+  <circle cx="190" cy="208" r="24" fill="#184f4a"/>
+  <circle cx="322" cy="208" r="24" fill="#184f4a"/>
+  <path d="M256 112v76" stroke="#256f69" stroke-width="28" stroke-linecap="round"/>
+  <path d="M218 150h76" stroke="#256f69" stroke-width="28" stroke-linecap="round"/>
+</svg>

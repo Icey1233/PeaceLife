@@ -1,0 +1,20 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Home Assistant runtime state, databases, logs, credentials, and local config
+home-assistant/config/
+
+# Logs and runtime artifacts
+*.log
+*.log.*
+*.db
+*.db-shm
+*.db-wal
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

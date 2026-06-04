@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f3ea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PeaceLife" />
+    <title>PeaceLife</title>
+    <link rel="manifest" href="manifest.webmanifest?v=25" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <link rel="stylesheet" href="styles.css?v=25" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <section class="brand" aria-label="PeaceLife">
+          <div class="brand-mark">PL</div>
+          <div>
+            <p class="eyebrow">PeaceLife</p>
+            <h1>生活状态</h1>
+          </div>
+        </section>
+        <section class="status-strip" aria-label="当前状态">
+          <div>
+            <span id="clock" class="clock">--:--</span>
+            <span id="dateLabel" class="date-label">--</span>
+          </div>
+          <button id="installButton" class="ghost-button" type="button" hidden>安装</button>
+        </section>
+      </header>
+
+      <section class="state-panel" aria-labelledby="stateTitle">
+        <div class="state-copy">
+          <p class="eyebrow">当前状态</p>
+          <h2 id="stateTitle">我已起床</h2>
+          <p id="stateDescription">面板会根据你的生活状态切换当前要关注的事项。</p>
+        </div>
+        <div id="stateButtons" class="state-buttons single" aria-label="切换到下一生活状态">
+          <button id="nextStateButton" class="state-button" type="button" data-state="away">我已离家</button>
+        </div>
+      </section>
+
+      <main class="layout">
+        <section class="butler-panel" aria-labelledby="butlerTitle">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">管家总览</p>
+              <h2 id="butlerTitle">现在需要关注</h2>
+            </div>
+            <button id="speakButlerButton" class="icon-button" type="button" aria-label="播报管家总览" title="播报管家总览">
+              <span aria-hidden="true">▶</span>
+            </button>
+          </div>
+          <div id="butlerSummary" class="butler-summary"></div>
+          <form id="captureForm" class="capture-form">
+            <label>
+              <span>快速捕获</span>
+              <input id="captureInput" name="capture" type="text" placeholder="想到什么先丢给管家，例如：买猫砂、修窗帘、周末洗床品" maxlength="80" />
+            </label>
+            <button class="primary-button" type="submit">收下</button>
+          </form>
+        </section>
+
+        <section class="proactive-panel" aria-labelledby="proactiveTitle">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">主动建议</p>
+              <h2 id="proactiveTitle">管家下一步</h2>
+            </div>
+            <button id="speakProactiveButton" class="icon-button" type="button" aria-label="播报主动建议" title="播报主动建议">
+              <span aria-hidden="true">▶</span>
+            </button>
+          </div>
+          <div id="proactiveList" class="proactive-list" aria-live="polite"></div>
+        </section>
+
+        <section class="agent-panel" aria-labelledby="agentTitle">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Agent</p>
+              <h2 id="agentTitle">问管家</h2>
+            </div>
+            <span id="agentStatus" class="agent-status is-offline">AI 未连接</span>
+            <button id="speakAgentButton" class="icon-button" type="button" aria-label="播报管家回复" title="播报管家回复">
+              <span aria-hidden="true">▶</span>
+            </button>
+          </div>
+          <form id="agentForm" class="agent-form">
+            <label>
+              <span>你想问管家什么</span>
+              <textarea id="agentInput" name="agent" rows="3" placeholder="可以直接提问，例如：解释一下这个想法；也可以问生活安排，例如：我快出门了，现在该注意什么" maxlength="500"></textarea>
+            </label>
+            <button id="agentSendButton" class="primary-button" type="submit">询问管家</button>
+          </form>
+          <div id="agentReply" class="agent-reply" aria-live="polite">
+            <p class="empty">管家会先直接回答你的问题；当前状态、天气、提醒、临时事项和设备状态会作为知识库辅助判断。</p>
+          </div>
+          <div id="agentActionList" class="agent-action-list"></div>
+        </section>
+
+        <section class="config-panel" aria-labelledby="configTitle">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Excel 配置</p>
+              <h2 id="configTitle">导入导出</h2>
+            </div>
+            <div class="config-actions">
+              <button id="exportConfigButton" class="secondary-button" type="button">导出配置</button>
+              <label class="ghost-button file-button">
+                <span>导入配置</span>
+                <input id="importConfigInput" type="file" accept=".xls,.xml,.html" />
+              </label>
+            </div>
+          </div>
+          <p class="config-note">可在 Excel/WPS 中编辑生活状态、阶段事项、定时提醒、临时事项和基础设置；敏感密钥不会导出。</p>
+          <form id="cloudConfigForm" class="cloud-form">
+            <label>
+              <span>云文档接口</span>
+              <input id="cloudConfigUrlInput" name="cloudConfigUrl" type="url" placeholder="Apps Script Web App URL，例如 https://script.google.com/macros/s/.../exec" />
+            </label>
+            <label>
+              <span>自动同步</span>
+              <select id="cloudSyncIntervalInput" name="cloudSyncInterval">
+                <option value="0">关闭</option>
+                <option value="5">每 5 分钟</option>
+                <option value="15">每 15 分钟</option>
+                <option value="30">每 30 分钟</option>
+                <option value="60">每 1 小时</option>
+              </select>
+            </label>
+            <button class="secondary-button" type="submit">保存云同步</button>
+            <button id="syncCloudConfigButton" class="primary-button" type="button">立即同步</button>
+            <button id="pushCloudConfigButton" class="secondary-button" type="button">初始化云文档</button>
+          </form>
+          <p id="cloudSyncStatus" class="cloud-sync-status">未配置云文档同步。</p>
+          <p class="cloud-format-note">请填写 Apps Script Web App URL，不是 Google Sheet 页面地址；云接口返回 JSON：states、moduleItems、reminders、inbox、settings。</p>
+        </section>
+
+        <section class="focus-panel" aria-labelledby="moduleTitle">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">当前模块</p>
+              <h2 id="moduleTitle">离家事项</h2>
+            </div>
+            <button id="speakButton" class="icon-button" type="button" aria-label="播报当前模块" title="播报当前模块">
+              <span aria-hidden="true">▶</span>
+            </button>
+          </div>
+          <div id="activeModule" class="active-module"></div>
+          <div class="quick-actions" aria-label="快捷操作">
+            <button id="resetModuleButton" class="secondary-button" type="button">重置当前清单</button>
+            <button id="requestNotify" class="primary-button" type="button">开启通知</button>
+            <button id="demoReminder" class="secondary-button" type="button">1 分钟测试提醒</button>
+            <button id="refreshAppButton" class="ghost-button" type="button">刷新应用</button>
+          </div>
+        </section>
+
+        <section class="today-panel" aria-labelledby="todayTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">时间线</p>
+              <h2 id="todayTitle">今天</h2>
+            </div>
+            <div id="todayCount" class="count-pill">0</div>
+          </div>
+          <div id="timeline" class="timeline" aria-live="polite"></div>
+        </section>
+
+        <section class="weather-panel" aria-labelledby="weatherTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">天气</p>
+              <h2 id="weatherTitle">今日天气</h2>
+            </div>
+            <button id="refreshWeatherButton" class="icon-button compact" type="button" aria-label="刷新天气" title="刷新天气">↻</button>
+          </div>
+          <div id="weatherCard" class="weather-card">
+            <p class="empty">输入城市后会显示天气。</p>
+          </div>
+          <form id="weatherForm" class="weather-form">
+            <label>
+              <span>城市</span>
+              <input id="cityInput" name="city" type="text" placeholder="例如：Shanghai" autocomplete="address-level2" />
+            </label>
+            <button class="secondary-button" type="submit">更新天气</button>
+          </form>
+        </section>
+
+        <section class="device-panel" aria-labelledby="deviceTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">设备</p>
+              <h2 id="deviceTitle">Home Assistant</h2>
+            </div>
+            <button id="refreshDeviceButton" class="icon-button compact" type="button" aria-label="刷新设备" title="刷新设备">↻</button>
+          </div>
+          <div id="deviceCard" class="device-card">
+            <p class="empty">填写 Home Assistant 后会显示设备。</p>
+          </div>
+          <form id="haForm" class="ha-form">
+            <label>
+              <span>HA 地址</span>
+              <input id="haUrlInput" name="haUrl" type="url" placeholder="http://localhost:8123" />
+            </label>
+            <label>
+              <span>Token</span>
+              <input id="haTokenInput" name="haToken" type="password" placeholder="Long-Lived Access Token" />
+            </label>
+            <label>
+              <span>空调实体</span>
+              <input id="haEntityInput" name="haEntity" type="text" placeholder="climate.bedroom_ac" />
+            </label>
+            <button class="secondary-button full" type="submit">保存并连接</button>
+          </form>
+        </section>
+
+        <section class="domains-panel" aria-labelledby="domainsTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">生活领域</p>
+              <h2 id="domainsTitle">维护雷达</h2>
+            </div>
+          </div>
+          <div id="domainList" class="domain-list"></div>
+        </section>
+
+        <section class="inbox-panel" aria-labelledby="inboxTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">收件箱</p>
+              <h2 id="inboxTitle">临时事项</h2>
+            </div>
+            <button id="clearInboxButton" class="ghost-button" type="button">清空已完成</button>
+          </div>
+          <div id="inboxList" class="inbox-list"></div>
+        </section>
+
+        <section class="module-panel" aria-labelledby="moduleListTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">模块</p>
+              <h2 id="moduleListTitle">状态对应事项</h2>
+            </div>
+          </div>
+          <div id="moduleList" class="module-list"></div>
+        </section>
+
+        <section class="rules-panel" aria-labelledby="rulesTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">SOP 规则</p>
+              <h2 id="rulesTitle">硬性规则</h2>
+            </div>
+          </div>
+          <div class="rule-list">
+            <p>快递外包装盒禁止带入家门</p>
+            <p>回家第一步先洗手</p>
+            <p>禁止穿外衣裤鞋进入卧室</p>
+            <p>晚上 10 点后禁止看手机</p>
+          </div>
+        </section>
+
+        <section class="form-panel" aria-labelledby="formTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">新建</p>
+              <h2 id="formTitle">提醒规则</h2>
+            </div>
+          </div>
+          <form id="reminderForm" class="reminder-form">
+            <label>
+              <span>内容</span>
+              <input id="titleInput" name="title" type="text" placeholder="例如：喝水、出门、整理书包" required maxlength="40" />
+            </label>
+
+            <div class="form-grid">
+              <label>
+                <span>时间</span>
+                <input id="timeInput" name="time" type="time" required />
+              </label>
+              <label>
+                <span>重复</span>
+                <select id="repeatInput" name="repeat">
+                  <option value="once">仅今天</option>
+                  <option value="daily">每天</option>
+                  <option value="weekdays">工作日</option>
+                  <option value="weekends">周末</option>
+                  <option value="weekly">每周</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              <span>播报语</span>
+              <textarea id="messageInput" name="message" rows="3" placeholder="不填时会直接播报提醒内容"></textarea>
+            </label>
+
+            <div class="toggle-row">
+              <label class="switch-line">
+                <input id="voiceInput" name="voice" type="checkbox" checked />
+                <span>到点语音播报</span>
+              </label>
+              <label class="switch-line">
+                <input id="notifyInput" name="notify" type="checkbox" checked />
+                <span>到点系统通知</span>
+              </label>
+            </div>
+
+            <button class="primary-button full" type="submit">添加提醒</button>
+          </form>
+        </section>
+
+        <section class="all-panel" aria-labelledby="allTitle">
+          <div class="panel-head tight">
+            <div>
+              <p class="eyebrow">规则</p>
+              <h2 id="allTitle">全部提醒</h2>
+            </div>
+            <button id="seedButton" class="ghost-button" type="button">导入 SOP</button>
+          </div>
+          <div id="reminderList" class="reminder-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="timelineItemTemplate">
+      <article class="timeline-item">
+        <time></time>
+        <div>
+          <h3></h3>
+          <p></p>
+        </div>
+        <button class="complete-button" type="button">完成</button>
+      </article>
+    </template>
+
+    <template id="reminderTemplate">
+      <article class="reminder-card">
+        <div>
+          <h3></h3>
+          <p></p>
+        </div>
+        <div class="card-actions">
+          <button class="toggle-button" type="button"></button>
+          <button class="delete-button" type="button" aria-label="删除提醒" title="删除提醒">×</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js?v=25" type="module"></script>
+  </body>
+</html>
